@@ -58,74 +58,71 @@ if selected == "Predictions":
 
     try:
         with st.form("form1"):
-            col1, col2, col3 = st.columns([5, 2, 5])
 
             # -----New Data inputs from the user for predicting the resale price-----
-            with col1:
-                street_name = st.text_input("Street Name")
-                block = st.text_input("Block Number")
-                floor_area_sqm = st.number_input('Floor Area (Per Square Meter)', min_value=1.0, max_value=500.0)
-            with col3:
-                lease_commence_date = st.number_input('Lease Commence Date')
-                storey_range = st.text_input("Storey Range (Format: 'Value1' TO 'Value2')")
+            street_name = st.text_input("Street Name")
+            block = st.text_input("Block Number")
+            floor_area_sqm = st.number_input('Floor Area (Per Square Meter)', min_value=1.0, max_value=500.0)
+            lease_commence_date = st.number_input('Lease Commence Date')
+            storey_range = st.text_input("Storey Range (Format: 'Value1' TO 'Value2')")
 
-                # -----Submit Button for PREDICT RESALE PRICE-----
-                submit_button = st.form_submit_button(label="PREDICT RESALE PRICE")
+            # -----Submit Button for PREDICT RESALE PRICE-----
+            submit_button = st.form_submit_button(label="PREDICT RESALE PRICE")
 
-                if submit_button is not None:
-                    with open(r"model.pkl", 'rb') as file:
-                        loaded_model = pickle.load(file)
-                    with open(r'scaler.pkl', 'rb') as f:
-                        scaler_loaded = pickle.load(f)
+            if submit_button is not None:
+                with open(r"model.pkl", 'rb') as file:
+                    loaded_model = pickle.load(file)
+                with open(r'scaler.pkl', 'rb') as f:
+                    scaler_loaded = pickle.load(f)
 
-                    # -----Calculating lease_remain_years using lease_commence_date-----
-                    lease_remain_years = 99 - (2023 - lease_commence_date)
+                # -----Calculating lease_remain_years using lease_commence_date-----
+                lease_remain_years = 99 - (2023 - lease_commence_date)
 
-                    # -----Calculating median of storey_range to make our calculations quite comfortable-----
-                    split_list = storey_range.split(' TO ')
-                    float_list = [float(i) for i in split_list]
-                    storey_median = statistics.median(float_list)
+                # -----Calculating median of storey_range to make our calculations quite comfortable-----
+                split_list = storey_range.split(' TO ')
+                float_list = [float(i) for i in split_list]
+                storey_median = statistics.median(float_list)
 
-                    # -----Getting the address by joining the block number and the street name-----
-                    address = block + " " + street_name
-                    query_address = address
-                    query_string = 'https://developers.onemap.sg/commonapi/search?searchVal=' + str(
-                        query_address) + '&returnGeom=Y&getAddrDetails=Y'
-                    resp = requests.get(query_string)
+                # -----Getting the address by joining the block number and the street name-----
+                address = block + " " + street_name
+                query_address = address
+                query_string = 'https://developers.onemap.sg/commonapi/search?searchVal=' + str(
+                    query_address) + '&returnGeom=Y&getAddrDetails=Y'
+                resp = requests.get(query_string)
 
-                    # -----Using OpenMap API getting the latitude and longitude location of that address-----
-                    origin = []
-                    data_geo_location = json.loads(resp.content)
-                    if data_geo_location['found'] != 0:
-                        latitude = data_geo_location['results'][0]['LATITUDE']
-                        longitude = data_geo_location['results'][0]['LONGITUDE']
-                        origin.append((latitude, longitude))
+                # -----Using OpenMap API getting the latitude and longitude location of that address-----
+                origin = []
+                data_geo_location = json.loads(resp.content)
+                if data_geo_location['found'] != 0:
+                    latitude = data_geo_location['results'][0]['LATITUDE']
+                    longitude = data_geo_location['results'][0]['LONGITUDE']
+                    origin.append((latitude, longitude))
 
-                    # -----Appending the Latitudes and Longitudes of the MRT Stations-----
-                    # Latitudes and Longitudes are been appended in the form of a tuple  to that list
-                    mrt_lat = mrt_location['latitude']
-                    mrt_long = mrt_location['longitude']
-                    list_of_mrt_coordinates = []
-                    for lat, long in zip(mrt_lat, mrt_long):
-                        list_of_mrt_coordinates.append((lat, long))
+                # -----Appending the Latitudes and Longitudes of the MRT Stations-----
+                # Latitudes and Longitudes are been appended in the form of a tuple  to that list
+                mrt_lat = mrt_location['latitude']
+                mrt_long = mrt_location['longitude']
+                list_of_mrt_coordinates = []
+                for lat, long in zip(mrt_lat, mrt_long):
+                    list_of_mrt_coordinates.append((lat, long))
 
-                    # -----Getting distance to nearest MRT Stations (Mass Rapid Transit System)-----
-                    list_of_dist_mrt = []
-                    for destination in range(0, len(list_of_mrt_coordinates)):
-                        list_of_dist_mrt.append(geodesic(origin, list_of_mrt_coordinates[destination]).meters)
-                    shortest = (min(list_of_dist_mrt))
-                    min_dist_mrt = shortest
-                    list_of_dist_mrt.clear()
+                # -----Getting distance to nearest MRT Stations (Mass Rapid Transit System)-----
+                list_of_dist_mrt = []
+                for destination in range(0, len(list_of_mrt_coordinates)):
+                    list_of_dist_mrt.append(geodesic(origin, list_of_mrt_coordinates[destination]).meters)
+                shortest = (min(list_of_dist_mrt))
+                min_dist_mrt = shortest
+                list_of_dist_mrt.clear()
 
-                    # -----Getting distance from CDB (Central Business District)-----
-                    cbd_dist = geodesic(origin, (1.2830, 103.8513)).meters  # CBD coordinates
+                # -----Getting distance from CDB (Central Business District)-----
+                cbd_dist = geodesic(origin, (1.2830, 103.8513)).meters  # CBD coordinates
 
-                    # -----Sending the user enter values for prediction to our model-----
-                    new_sample = np.array(
-                        [[cbd_dist, min_dist_mrt, np.log(floor_area_sqm), lease_remain_years, np.log(storey_median)]])
-                    new_sample = scaler_loaded.transform(new_sample[:, :5])
-                    new_pred = loaded_model.predict(new_sample)[0]
-                    st.write('## :green[Predicted resale price:] ', np.exp(new_pred))
+                # -----Sending the user enter values for prediction to our model-----
+                new_sample = np.array(
+                    [[cbd_dist, min_dist_mrt, np.log(floor_area_sqm), lease_remain_years, np.log(storey_median)]])
+                new_sample = scaler_loaded.transform(new_sample[:, :5])
+                new_pred = loaded_model.predict(new_sample)[0]
+                st.write('## :green[Predicted resale price:] ', np.exp(new_pred))
 
     except Exception as e:
         st.write("Enter the above values to get the predicted resale price of the flat")
