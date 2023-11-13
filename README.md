@@ -7,6 +7,9 @@
 <!--- ### Link : <a href="https://www.linkedin.com/posts/activity-7124770125538357248-6FxL?utm_source=share&utm_medium=member_desktop">LinkedIn Post / Working Model Video</a>
 <br/> --->
 
+### Link : <a href="https://singapore-resale-flat-prices-prediction-819q.onrender.com">Singapore Resale Flat Price Prediction Streamlit Application</a>
+<br/>
+
 ## Prerequisites
 1. **Python** -- Programming Language
 2. **pandas** -- Python Library for Data Visualization
