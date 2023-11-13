@@ -47,4 +47,4 @@ To predict the resale price of a Singapore Flats, follow these steps:
 3. Click the **"PREDICT RESALE PRICE"** button.
 4. The app will display the predicted resale price based on the provided information.
 
-  > **_NOTE:_**  To get a comprehensive overview of how to use the Application locally and also on the Web Browser, please refer to the attached document titled "Documentation for Application Use.pdf". 
+  > **_NOTE:_**  To get a comprehensive overview of how to use the Application locally and also on the Web Browser, please refer to the attached document titled "Documentation_for_Application_Use.pdf". 
