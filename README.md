@@ -4,10 +4,9 @@
 
 **Domain** : Real Estate
 
-<!--- ### Link : <a href="https://www.linkedin.com/posts/activity-7124770125538357248-6FxL?utm_source=share&utm_medium=member_desktop">LinkedIn Post / Working Model Video</a>
-<br/> --->
+### Link1 : <a href="https://www.linkedin.com/posts/activity-7130280626942861312-SkRV?utm_source=share&utm_medium=member_desktop">LinkedIn Post / Working Model Video</a>
 
-### Link : <a href="https://singapore-resale-flat-prices-prediction-819q.onrender.com">Singapore Resale Flat Price Prediction Streamlit Application</a>
+### Link2 : <a href="https://singapore-resale-flat-prices-prediction-819q.onrender.com">Singapore Resale Flat Price Prediction Streamlit Application</a>
 <br/>
 
 ## Prerequisites
